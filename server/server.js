@@ -70,13 +70,26 @@ function getStoryTextConcatenated(story) {
     return mergedText;
 }
 
+function getStoryTextFlattened(story) {
+    let flattenedText = '';
+    if (story.text) {
+        flattenedText += `Author: ${story.by}\nComment: ${story.text}`;
+    }
+    if (story.kidIds) {
+        for (let i = 0; i < story.kidIds.length; i++) {
+            flattenedText += '\n\n' + getStoryTextFlattened(story.kidContents[story.kidIds[i]]);
+        }
+    }
+    return flattenedText;
+}
+
 app.get('/', async (req, res) => {
     res.status(200).send({
         message: 'Server is running.',
     });
 });
 
-app.get('/:storyId', async (req, res) => {
+app.get('/story/contents/tree/:storyId', async (req, res) => {
     console.log({ req });
 
     try {
@@ -99,8 +112,23 @@ app.get('/:storyId', async (req, res) => {
 
         res.status(200).send({
             story: story,
-            // summary: summaryText,
         })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ error });
+    }
+});
+
+app.get('/story/contents/flat/:storyId', async (req, res) => {
+    console.log({ req });
+
+    try {
+        // e.g. 35162458
+        const storyId = req.params.storyId;
+        const story = await fetchHackerNewsItemsContents(storyId);
+        const flattenedStoryText = getStoryTextFlattened(story);
+        
+        res.status(200).send({ flattenedStoryText });
     } catch (error) {
         console.log(error);
         res.status(500).send({ error });
