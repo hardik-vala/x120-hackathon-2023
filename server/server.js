@@ -142,23 +142,25 @@ app.post('/', async (req, res) => {
         // e.g. 35162458
         const storyId = req.body.storyId;
         const story = await fetchHackerNewsItemsContents(storyId);
+        const flattenedStoryText = getStoryTextFlattened(story);
 
-        const mergedText = getStoryTextConcatenated(story);
-        const prompt = `Summarize the most important points in the following text: "${mergedText}"`
-        const summary = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `${prompt}\n\n`,
-            temperature: 0.2,
-            max_tokens: MAX_TOKENS,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-        });
-        const summaryText = summary.data.choices[0].text;
+        // const mergedText = getStoryTextConcatenated(story);
+        // const prompt = `Summarize the most important points in the following text: "${mergedText}"`
+        // const summary = await openai.createCompletion({
+        //     model: "text-davinci-003",
+        //     prompt: `${prompt}\n\n`,
+        //     temperature: 0.2,
+        //     max_tokens: MAX_TOKENS,
+        //     top_p: 1,
+        //     frequency_penalty: 0,
+        //     presence_penalty: 0,
+        // });
+        // const summaryText = summary.data.choices[0].text;
 
         res.status(200).send({
             story: story,
-            summary: summaryText,
+            flattenedStoryText: flattenedStoryText,
+            // summary: summaryText,
         })
     } catch (error) {
         console.log(error);

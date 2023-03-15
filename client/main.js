@@ -48,9 +48,8 @@ const handleSubmit = async (e) => {
     });
     
     if (response.ok) {
-      // const data = await response.json();
-      const data = await response.text();
-      outputContainer.innerHTML = data;
+      const data = await response.json();
+      outputContainer.innerHTML = data.flattenedStoryText;
     } else {
       const err = await response.text();
       alert(`code: ${response.status}\nerror: ${response.statusText}`);
