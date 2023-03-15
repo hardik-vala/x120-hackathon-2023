@@ -34,6 +34,8 @@ const handleSubmit = async (e) => {
 
   form.reset();
 
+  outputContainer.innerHTML = '';
+
   try {
     const response = await fetchWithTimeout(serverUrl, {
       method: 'POST',
@@ -49,7 +51,10 @@ const handleSubmit = async (e) => {
     
     if (response.ok) {
       const data = await response.json();
-      outputContainer.innerHTML = data.flattenedStoryText;
+      for (let i = 0; i < data.flattenedStory.length; i++) {
+        outputContainer.innerHTML += `<div>Author: ${data.flattenedStory[i].by}</div>`;
+        outputContainer.innerHTML += `<div>Comment: ${data.flattenedStory[i].text}</div>`;
+      }
     } else {
       const err = await response.text();
       alert(`code: ${response.status}\nerror: ${response.statusText}`);
