@@ -1,6 +1,7 @@
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import express from 'express';
+import fetch from 'node-fetch';
 import { Configuration, OpenAIApi } from 'openai';
 
 dotenv.config();
@@ -83,22 +84,22 @@ app.get('/:storyId', async (req, res) => {
         const storyId = req.params.storyId;
         const story = await fetchHackerNewsItemsContents(storyId);
 
-        const mergedText = getStoryTextConcatenated(story);
-        const prompt = `Summarize the most important points in the following text: "${mergedText}"`
-        const summary = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `${prompt}\n\n`,
-            temperature: 0.2,
-            max_tokens: MAX_TOKENS,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-        });
-        const summaryText = summary.data.choices[0].text;
+        // const mergedText = getStoryTextConcatenated(story);
+        // const prompt = `Summarize the most important points in the following text: "${mergedText}"`
+        // const summary = await openai.createCompletion({
+        //     model: "text-davinci-003",
+        //     prompt: `${prompt}\n\n`,
+        //     temperature: 0.2,
+        //     max_tokens: MAX_TOKENS,
+        //     top_p: 1,
+        //     frequency_penalty: 0,
+        //     presence_penalty: 0,
+        // });
+        // const summaryText = summary.data.choices[0].text;
 
         res.status(200).send({
             story: story,
-            summary: summaryText,
+            // summary: summaryText,
         })
     } catch (error) {
         console.log(error);
