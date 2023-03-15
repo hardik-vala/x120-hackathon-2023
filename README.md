@@ -7,6 +7,13 @@ X120 Hackathon project.
 ### Client
 
 ```
-cd client
+cd client/
 npm run dev
+```
+
+### Server
+
+```
+cd server/
+npm run server
 ```
