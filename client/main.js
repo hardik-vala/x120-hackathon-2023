@@ -43,8 +43,8 @@ const handleSubmit = async (e) => {
       body: JSON.stringify({
         storyId: data.get('storyId')
       }),
-      // 30 sec
-      timeout: 30000,
+      // 60 sec
+      timeout: 60000,
     });
     
     if (response.ok) {
