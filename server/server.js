@@ -156,7 +156,6 @@ app.post('/', async (req, res) => {
         const flattenedStory = flattenStory(story);
 
         const prompt = decode(convertFlattenedStoryToPrompt(style, flattenedStory));
-        console.log(prompt);
         
         const completionResponse = await openai.createCompletion({
             model: "text-davinci-003",
