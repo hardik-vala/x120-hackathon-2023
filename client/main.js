@@ -32,6 +32,9 @@ const handleSubmit = async (e) => {
   const serverUrl = getServerUrl();
   console.log(`Server URL: ${serverUrl}`);
 
+  const styleSelect = document.getElementById('style');
+  console.log(`Selected style: ${styleSelect.value}`);
+
   form.reset();
 
   outputContainer.innerHTML = '';
@@ -43,7 +46,8 @@ const handleSubmit = async (e) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        storyId: data.get('storyId')
+        storyId: data.get('storyId'),
+        style: styleSelect.value,
       }),
       // 60 sec
       timeout: 60000,
@@ -51,6 +55,7 @@ const handleSubmit = async (e) => {
     
     if (response.ok) {
       const data = await response.json();
+      outputContainer.innerHTML += `<div>Summary: ${data.completion}</div>`;
       for (let i = 0; i < data.flattenedStory.length; i++) {
         outputContainer.innerHTML += `<div>Author: ${data.flattenedStory[i].by}</div>`;
         outputContainer.innerHTML += `<div>Comment: ${data.flattenedStory[i].text}</div>`;
