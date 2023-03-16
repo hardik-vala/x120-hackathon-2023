@@ -83,9 +83,9 @@ function getPrompt(style) {
     if (style === 'bullet-points') {
         return 'Extract from this forum discussion a list of the top 10 most valuable insights, data points and web links. Format them as a numbered list, with titles. The style is factual and informative.'
     } else if (style === 'comedian') {
-        return 'Summarize this forum discussion thread in 400-500 words. In the style of a stand-up comedian, tell a story around the 3 funniest quotes. Use active and very casual language.'
+        return 'Summarize this forum discussion thread in 300-400 words. In the style of a stand-up comedian, tell a story around the 3 funniest quotes. Use active and very casual language.'
     } else if (style === 'tech-podcast') {
-        return 'Summarize this forum discussion thread in 400-500 words. Start with a quick summary of the three most debated topics. Then dive into each topic in more detail. Use present tense, active language and a casual tone. Frame it as a dialog between "Host1" and "Host2" on a technology podcast.'
+        return 'Summarize this forum discussion thread in 300-400 words. Start with a quick summary of the three most debated topics. Then dive into each topic in more detail. Use present tense, active language and a casual tone. Frame it as a dialog between "Host1" and "Host2" on a technology podcast.'
     } else {
         throw new Error(`Unrecognized style: ${style}`);
     }
