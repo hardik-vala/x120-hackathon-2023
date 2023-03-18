@@ -105,6 +105,60 @@ function convertFlattenedStoryToPrompt(style, flattenedStory) {
     return text;
 }
 
+function getVoiceParams(style) {
+    if (style === 'bullet-points') {
+        return {languageCode: 'en-US', name: 'en-US-Wavenet-D', ssmlGender: 'MALE'};
+    } else if (style === 'comedian') {
+        return {languageCode: 'en-IN', name: 'en-IN-Standard-B', ssmlGender: 'MALE'};
+    } else if (style === 'tech-podcast') {
+        return [{languageCode: 'en-US', name: 'en-US-Studio-M', ssmlGender: 'MALE'}, {languageCode: 'en-US', name: 'en-US-Studio-O', ssmlGender: 'FEMALE'}];
+    } else {
+        throw new Error(`Unrecognized style: ${style}`);
+    }
+}
+
+function parseTechPodcastSummary(text) {
+    let replacedText = text.replace(/Host1/g, 'Jason');
+    replacedText = replacedText.replace(/Host2/g, 'Molly');
+
+    const parsedSummary = [];
+    const splits = replacedText.split('Jason:');
+    for (let i = 0; i < splits.length; i++) {
+        const subSplits = splits[i].split('Molly:');
+        parsedSummary.push({speaker: 'Jason', content: subSplits[0]});
+        for (let j = 1; j < subSplits.length; j++) {
+            parsedSummary.push({speaker: 'Molly', content: subSplits[j]});
+        }
+    }
+    return parsedSummary;
+}
+
+async function convertTextToSpeech(text, voice, outputPath) {
+    const textToSpeechReq = {
+        input: {text: text},
+        voice: voice,
+        audioConfig: {audioEncoding: 'MP3'},
+    };
+
+    const [response] = await textToSpeechClient.synthesizeSpeech(textToSpeechReq);
+    const writeFile = util.promisify(fs.writeFile);
+    await writeFile(outputPath, response.audioContent, 'binary');
+    console.log(`Audio content written to file: ${outputPath}`);
+}
+
+async function convertSummaryToSpeech(summary, style) {
+    if (style === 'tech-podcast') {
+        const parsedSummary = parseTechPodcastSummary(summary);
+        const voices = getVoiceParams(style);
+        for (let i = 0; i < parsedSummary.length; i++) {
+            let voice = (parsedSummary[i].speaker === 'Jason') ? voices[0] : voices[1];
+            convertTextToSpeech(parsedSummary[i].content, voice, `output${i}.mp3`);
+        }
+    } else {
+        convertTextToSpeech(summary, getVoiceParams(style), 'output.mp3');
+    }
+}
+
 app.get('/', async (req, res) => {
     res.status(200).send({
         message: 'Server is running.',
@@ -156,7 +210,8 @@ app.post('/', async (req, res) => {
         const flattenedStory = flattenStory(story);
 
         const prompt = decode(convertFlattenedStoryToPrompt(style, flattenedStory));
-        
+        console.log(prompt);
+
         const completionResponse = await openai.createCompletion({
             model: "text-davinci-003",
             prompt: `${prompt}\n\n`,
@@ -167,30 +222,8 @@ app.post('/', async (req, res) => {
             presence_penalty: 0,
         });
         const completionText = completionResponse.data.choices[0].text;
-        
-        // const s = flattenedStoryText.substring(0, 100);
-        // const textToSpeechReq = {
-        //     input: {text: s},
-        //     voice: {languageCode: 'en-US', name: 'en-US-Wavenet-D', ssmlGender: 'MALE'},
-        //     audioConfig: {audioEncoding: 'MP3'},
-        // };
 
-        // const [response] = await textToSpeechClient.synthesizeSpeech(textToSpeechReq);
-        // // Write the binary audio content to a local file
-        // const writeFile = util.promisify(fs.writeFile);
-        // await writeFile('output1.mp3', response.audioContent, 'binary');
-        // console.log('Audio content written to file: output1.mp3');
-
-        // const s2 = flattenedStoryText.substring(100, 200);
-        // const textToSpeechReq2 = {
-        //     input: {text: s2},
-        //     voice: {languageCode: 'en-US', name: 'en-US-Wavenet-E', ssmlGender: 'FEMALE'},
-        //     audioConfig: {audioEncoding: 'MP3'},
-        // };
-        // const [response2] = await textToSpeechClient.synthesizeSpeech(textToSpeechReq2);
-        // const writeFile2 = util.promisify(fs.writeFile);
-        // await writeFile2('output2.mp3', response2.audioContent, 'binary');
-        // console.log('Audio content written to file: output2.mp3');
+        await convertSummaryToSpeech(completionText, style);
 
         res.status(200).send({
             story: story,
